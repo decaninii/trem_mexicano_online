@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Trem Mexicano</title>
+<style>
+  :root{
+    --bg-deep:#12211D;
+    --felt:#1F3B34;
+    --felt-light:#2A4A3D;
+    --felt-line: rgba(217,164,65,0.35);
+    --wood:#3B2A20;
+    --wood-dark:#291C15;
+    --rail:#D9A441;
+    --rail-bright:#F0C468;
+    --ivory:#F2ECDD;
+    --ivory-dim:#E4DCC8;
+    --ink:#241B14;
+    --rust:#B23A2E;
+    --rust-bright:#D14E3F;
+    --cream:#F5F0E6;
+    --muted:#B9AF9C;
+    --shadow: 0 6px 18px rgba(0,0,0,0.35);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    background: radial-gradient(ellipse at top, #1a332c 0%, var(--bg-deep) 60%);
+    color:var(--cream);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    min-height:100vh; display:flex; flex-direction:column;
+  }
+  #app{flex:1;display:flex;flex-direction:column;min-height:100vh;}
+  ::-webkit-scrollbar{height:8px;width:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--rail);border-radius:4px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+
+  button{font-family:inherit;cursor:pointer;border:none;border-radius:10px;padding:12px 20px;font-size:15px;font-weight:600;transition:transform .12s ease, background .15s ease, box-shadow .15s ease;}
+  button:active{transform:scale(0.96);}
+  button:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+  .btn-primary{background:var(--rail);color:var(--wood-dark);box-shadow:var(--shadow);}
+  .btn-primary:hover:not(:disabled){background:var(--rail-bright);}
+  .btn-ghost{background:transparent;color:var(--cream);border:1.5px solid rgba(245,240,230,0.3);}
+  .btn-ghost:hover:not(:disabled){border-color:var(--rail);color:var(--rail-bright);}
+  .btn-danger{background:var(--rust);color:var(--cream);}
+  .btn-danger:hover:not(:disabled){background:var(--rust-bright);}
+  .btn-small{padding:7px 12px;font-size:13px;border-radius:8px;}
+
+  input[type=text]{font-family:inherit;background:rgba(0,0,0,0.25);border:1.5px solid rgba(245,240,230,0.25);color:var(--cream);padding:12px 14px;border-radius:10px;font-size:16px;outline:none;}
+  input[type=text]:focus{border-color:var(--rail);}
+  input[type=text]::placeholder{color:var(--muted);}
+  a{color:var(--rail-bright);}
+
+  /* ---------- Landing ---------- */
+  .landing{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px;text-align:center;gap:6px;}
+  .landing h1{font-family:Georgia,'Iowan Old Style','Palatino Linotype',serif;font-size:clamp(2.6rem,8vw,4.2rem);font-weight:700;letter-spacing:0.5px;margin:0;color:var(--ivory);text-shadow:0 3px 0 rgba(0,0,0,0.4);}
+  .landing .rail-rule{width:120px;height:3px;background:var(--rail);margin:14px auto 18px;border-radius:2px;position:relative;}
+  .landing .rail-rule::before,.landing .rail-rule::after{content:'';position:absolute;top:-3px;width:3px;height:9px;background:var(--rail);}
+  .landing .rail-rule::before{left:20px;}
+  .landing .rail-rule::after{right:20px;}
+  .landing p.sub{color:var(--muted);max-width:420px;margin:0 0 28px;font-size:15px;line-height:1.5;}
+  .landing-cards{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;max-width:520px;}
+  .depot-card{background:linear-gradient(160deg, var(--felt-light), var(--felt));border:1px solid var(--felt-line);border-radius:14px;padding:22px 24px;width:220px;box-shadow:var(--shadow);text-align:left;}
+  .depot-card h3{margin:0 0 6px;font-size:17px;color:var(--rail-bright);}
+  .depot-card p{margin:0 0 14px;font-size:13px;color:var(--muted);line-height:1.4;}
+  .depot-card input{width:100%;margin-bottom:10px;}
+  .depot-card button{width:100%;}
+  .field-error{color:var(--rust-bright);font-size:13px;margin-top:8px;min-height:16px;}
+
+  /* ---------- Lobby ---------- */
+  .lobby{flex:1;display:flex;flex-direction:column;align-items:center;padding:36px 20px;gap:18px;}
+  .code-plate{background:var(--wood);border:2px solid var(--rail);border-radius:12px;padding:14px 28px;text-align:center;}
+  .code-plate .label{font-size:12px;color:var(--muted);letter-spacing:1px;}
+  .code-plate .code{font-size:38px;font-weight:800;color:var(--rail-bright);letter-spacing:6px;font-family:Georgia,serif;}
+  .manifest{width:100%;max-width:420px;background:rgba(0,0,0,0.18);border-radius:14px;padding:18px 20px;}
+  .manifest h3{margin:0 0 12px;font-size:14px;color:var(--muted);font-weight:600;}
+  .manifest ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;}
+  .manifest li{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.04);border-radius:8px;padding:10px 14px;font-size:15px;}
+  .manifest li .pname{flex:1;}
+  .badge-host{font-size:11px;background:var(--rail);color:var(--wood-dark);padding:2px 8px;border-radius:10px;font-weight:700;}
+  .lobby-hint{color:var(--muted);font-size:14px;text-align:center;max-width:360px;}
+  .color-dot{width:13px;height:13px;border-radius:50%;display:inline-block;flex:0 0 auto;border:1px solid rgba(0,0,0,0.25);}
+  .swatch-box{width:100%;max-width:420px;background:rgba(0,0,0,0.18);border-radius:14px;padding:16px 20px;}
+  .swatch-box h3{margin:0 0 10px;font-size:14px;color:var(--muted);font-weight:600;}
+  .swatch-row{display:flex;gap:10px;flex-wrap:wrap;}
+  .swatch{width:32px;height:32px;border-radius:50%;border:2px solid transparent;cursor:pointer;}
+  .swatch.mine{border-color:var(--cream);box-shadow:0 0 0 2px var(--rail);}
+  .swatch.taken{opacity:0.25;cursor:not-allowed;}
+
+  /* ---------- Game screen ---------- */
+  .game{flex:1;display:flex;flex-direction:column;height:100vh;}
+  .topbar{background:var(--wood);border-bottom:2px solid var(--rail);padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .topbar .chip{font-size:12px;color:var(--muted);}
+  .topbar .chip b{color:var(--cream);}
+  .topbar .turn-flag{margin-left:auto;background:var(--rust);color:var(--cream);padding:7px 14px;border-radius:20px;font-weight:700;font-size:13px;}
+  .topbar .turn-flag.me{background:var(--rail);color:var(--wood-dark);}
+  .topbar button{margin-left:6px;}
+
+  .player-strip{display:flex;gap:8px;flex-wrap:wrap;padding:8px 14px;font-size:12.5px;color:var(--ivory-dim);background:rgba(0,0,0,0.15);}
+  .player-chip{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);padding:4px 10px;border-radius:14px;}
+  .player-chip b{color:var(--cream);}
+  .player-chip.low-tiles{background:rgba(178,58,46,0.35);border:1px solid var(--rust-bright);color:var(--cream);animation:lowTilesPulse 1.6s infinite;}
+  @keyframes lowTilesPulse{0%,100%{box-shadow:0 0 0 0 rgba(178,58,46,0.5);}50%{box-shadow:0 0 0 5px rgba(178,58,46,0);}}
+
+  .double-alert{margin:0 14px;padding:10px 14px;background:rgba(178,58,46,0.25);border:1.5px solid var(--rust-bright);border-radius:10px;font-size:13px;font-weight:600;color:var(--cream);}
+
+  .ends-panel{padding:6px 14px 0;}
+  .ends-title{font-size:11px;color:var(--muted);margin:0 0 4px;}
+  .ends-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;}
+  .end-card{background:var(--wood);border:2px solid rgba(217,164,65,0.25);border-radius:9px;padding:4px 12px;min-width:58px;text-align:center;cursor:pointer;flex:0 0 auto;}
+  .end-card.is-target{border-color:var(--rail-bright);box-shadow:0 0 0 3px rgba(240,196,104,0.3);animation:branchPulse 1.4s infinite;}
+  .end-label{font-size:9.5px;color:var(--muted);margin-bottom:1px;white-space:nowrap;max-width:76px;overflow:hidden;text-overflow:ellipsis;}
+  .end-value{font-size:20px;font-weight:800;line-height:1.15;}
+
+  .count-panel{margin:8px 14px 0;}
+  .count-toggle{font-size:12px;}
+  .count-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(42px,1fr));gap:6px;margin-top:8px;background:rgba(0,0,0,0.18);border-radius:10px;padding:10px;}
+  .count-chip{background:rgba(255,255,255,0.05);border-radius:6px;padding:4px 2px;text-align:center;font-size:11px;color:var(--ivory-dim);}
+  .count-chip b{display:block;font-size:13px;color:var(--rail-bright);}
+
+  .board-scroll{flex:1;min-height:0;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:6px;}
+  .board-zoom-wrap{position:relative;overflow:hidden;touch-action:none;border-radius:12px;background:var(--felt);border:1px solid var(--felt-line);flex:1 1 auto;min-height:200px;}
+  .board-zoom-inner{position:absolute;top:0;left:0;width:3600px;height:3600px;transform-origin:0 0;will-change:transform;}
+  .zoom-controls{display:flex;align-items:center;gap:8px;justify-content:center;}
+  .zoom-controls .zoom-level{font-size:12px;color:var(--muted);min-width:44px;text-align:center;}
+  .branch-hit{fill:rgba(0,0,0,0.001);}
+  .branch-hit.is-target{fill:rgba(240,196,104,0.16);animation:branchPulse 1.4s infinite;}
+  @keyframes branchPulse{0%,100%{fill-opacity:0.12;}50%{fill-opacity:0.4;}}
+
+  .log-panel{background:rgba(0,0,0,0.25);border-radius:10px;padding:10px 14px;font-size:12.5px;color:var(--muted);max-height:100px;overflow-y:auto;}
+  .log-panel div{margin-bottom:3px;}
+
+  .hand-wrap{background:var(--wood);border-top:2px solid var(--rail);padding:10px 12px;}
+  .hand-wrap .hand-label{font-size:11px;color:var(--muted);margin-bottom:6px;}
+  .hand-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;}
+  .reorder-row{display:flex;gap:8px;justify-content:center;margin-top:6px;}
+  .action-row{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;}
+  .action-hint{font-size:13px;color:var(--muted);flex:1;min-width:140px;}
+
+  .tile{flex:0 0 auto;background:var(--ivory);border-radius:6px;box-shadow:0 2px 4px rgba(0,0,0,0.4);display:flex;position:relative;}
+  .tile.hand-tile{width:40px;height:74px;flex-direction:column;cursor:pointer;border:2px solid transparent;}
+  .tile.hand-tile .half{flex:1;display:flex;align-items:center;justify-content:center;position:relative;}
+  .tile.hand-tile .half:first-child{border-bottom:1.5px solid var(--ink);}
+  .tile.hand-tile.selected{border-color:var(--rail-bright);transform:translateY(-6px);box-shadow:0 6px 10px rgba(0,0,0,0.5);}
+  .tile.hand-tile.dragging{z-index:20;box-shadow:0 12px 20px rgba(0,0,0,0.55);border-color:var(--rail-bright);}
+  .chip-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+  .chip-btn{background:rgba(255,255,255,0.08);color:var(--cream);border:1.5px solid transparent;border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600;}
+  .chip-btn.active{background:var(--rail);color:var(--wood-dark);border-color:var(--rail-bright);}
+  .mini-label{font-size:11px;color:var(--muted);margin:8px 0 4px;text-transform:none;}
+  .tile.is-double{background:var(--ivory-dim);outline:2px solid var(--rail);}
+  .pip-grid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);width:78%;height:78%;}
+  .pip{border-radius:50%;background:var(--ink);width:60%;height:60%;justify-self:center;align-self:center;}
+  .numeral{font-weight:800;color:var(--ink);font-size:13px;}
+
+  .modal-backdrop{position:fixed;inset:0;background:rgba(10,15,13,0.72);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50;}
+  .modal{background:var(--felt);border:1px solid var(--felt-line);border-radius:16px;padding:26px 26px 22px;max-width:460px;width:100%;box-shadow:var(--shadow);max-height:85vh;overflow-y:auto;}
+  .modal h2{margin:0 0 4px;font-family:Georgia,serif;color:var(--rail-bright);font-size:24px;}
+  .modal .sub{color:var(--muted);font-size:13px;margin-bottom:16px;}
+  table.score-table{width:100%;border-collapse:collapse;font-size:14px;}
+  table.score-table th,table.score-table td{padding:8px 6px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.08);}
+  table.score-table th{color:var(--muted);font-weight:600;font-size:12px;}
+  table.score-table td.pname{display:flex;align-items:center;gap:8px;}
+  table.score-table tr.leader td{color:var(--rail-bright);font-weight:700;}
+  .modal-actions{display:flex;gap:10px;margin-top:18px;justify-content:flex-end;}
+
+  .rules-body{font-size:14px;line-height:1.55;color:var(--ivory-dim);}
+  .rules-body h4{color:var(--rail-bright);margin:14px 0 4px;font-size:14px;}
+  .rules-body p{margin:0 0 8px;}
+
+  @media (max-width:480px){
+    .tile.hand-tile{width:36px;height:64px;}
+    .depot-card{width:100%;}
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ============================== CONSTANTS ============================== */
+const MAX_VAL = 12;
+const HAND_SIZE = {2:15,3:13,4:13,5:11,6:11,7:9,8:9};
+const POLL_MS = 2500;
+const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const PALETTE = ['#E63946','#F4A300','#FFD23F','#2EC4B6','#3A86FF','#8338EC','#FF6FB5','#6B8E23'];
+/* one distinct color per pip value (index 0 unused — blanks have no pips) */
+const PIP_COLORS = ['#241B14','#D62828','#F77F00','#B08900','#2A9D8F','#277DA1','#4361EE','#7209B7','#B5179E','#F72585','#43AA8B','#577590','#6D4C41'];
+
+/* board geometry (SVG local units) */
+const HUB_R = 130;
+const MARKER_R = 200;
+const TILE_START = 260;
+const TILE_LEN = 84;
+const TILE_THICK = 48;
+const TILE_GAP = 6;
+const VIEWBOX = 3600;
+const CENTER = VIEWBOX/2;
+
+/* ============================== APP STATE (local, in-memory) ============================== */
+const appState = {
+  mode:'landing', identity:null, code:null, room:null, pollTimer:null,
+  selectedHandIdx:null, error:'', rulesOpen:false, busy:false,
+  zoom:0.55, panX:0, panY:0, boardMounted:false, showCounts:false,
+  isLocal:false, botDifficulty:'medium',
+  localSetup:{players:4, difficulty:'medium'},
+};
+
+/* ============================== UTIL ============================== */
+function randomId(){ return 'p_' + Math.random().toString(36).slice(2,10); }
+function randomCode(len=4){
+  let s=''; for(let i=0;i<len;i++) s += CODE_ALPHABET[Math.floor(Math.random()*CODE_ALPHABET.length)];
+  return s;
+}
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+  return arr;
+}
+function buildFullSet(maxVal){
+  const out=[]; for(let a=0;a<=maxVal;a++) for(let b=a;b<=maxVal;b++) out.push({a,b}); return out;
+}
+function tileSum(t){ return t.a+t.b; }
+function isDouble(t){ return t.a===t.b; }
+function nameOf(room,id){
+  if(id==='mexican') return 'Trem Mexicano';
+  const p = room.players.find(p=>p.id===id);
+  return p ? p.name : '???';
+}
+function colorOf(room,id){
+  if(id==='mexican') return null;
+  const p = room.players.find(p=>p.id===id);
+  return (p && p.color) ? p.color : '#8a8a8a';
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ============================== STORAGE HELPERS ============================== */
+async function loadRoom(code){
+  try{ const res = await window.storage.get('mxt_room_'+code, true); return res ? JSON.parse(res.value) : null; }
+  catch(e){ return null; }
+}
+async function saveRoom(room){
+  room.updatedAt = Date.now();
+  try{ await window.storage.set('mxt_room_'+room.code, JSON.stringify(room), true); return true; }
+  catch(e){ return false; }
+}
+async function loadIdentity(code){
+  try{ const res = await window.storage.get('mxt_me_'+code, false); return res ? JSON.parse(res.value) : null; }
+  catch(e){ return null; }
+}
+async function saveIdentity(code, me){
+  try{ await window.storage.set('mxt_me_'+code, JSON.stringify(me), false); } catch(e){ /* non-fatal */ }
+}
+
+/* room access: local (vs. computer) games live only in memory; online games use shared storage */
+async function getRoom(){
+  return appState.isLocal ? appState.room : await loadRoom(appState.code);
+}
+async function putRoom(room){
+  if(appState.isLocal){ appState.room = room; return true; }
+  return await saveRoom(room);
+}
+
+/* ============================== GAME ENGINE ============================== */
+function createRoomState(code, host){
+  return {
+    code, hostId: host.id, phase:'lobby',
+    players:[{id:host.id,name:host.name,color:null}],
+    roundNumber:0, round:null, scores:{},
+    log:[`${host.name} criou a sala.`],
+  };
+}
+
+function addLog(room, text){
+  room.log.push(text);
+  if(room.log.length>40) room.log = room.log.slice(-40);
+}
+
+function startRound(room, doubleValue){
+  const full = buildFullSet(MAX_VAL);
+  const hubIdx = full.findIndex(t=>t.a===doubleValue && t.b===doubleValue);
+  full.splice(hubIdx,1);
+  shuffle(full);
+  const n = room.players.length;
+  const handSize = HAND_SIZE[n] || 9;
+  const hands = {}; let cursor=0;
+  room.players.forEach(p=>{ hands[p.id] = full.slice(cursor, cursor+handSize); cursor += handSize; });
+  const boneyard = full.slice(cursor);
+  const trains = {};
+  room.players.forEach(p=>{ trains[p.id] = {ownerId:p.id, tiles:[], endValue:doubleValue, public:false}; });
+  trains['mexican'] = {ownerId:'mexican', tiles:[], endValue:doubleValue, public:false};
+
+  const order = room.players.map(p=>p.id);
+  const startIdx = room.roundNumber % n;
+  const turnOrder = order.slice(startIdx).concat(order.slice(0,startIdx));
+
+  room.round = {
+    doubleValue, hub:{a:doubleValue,b:doubleValue},
+    hands, boneyard, trains, turnOrder, turnIndex:0,
+    pendingDouble:null,
+    hasDrawnThisTurn:false, turnsTaken:0,
+    consecutivePasses:0, finished:false, winnerId:null, blocked:false,
+  };
+  room.phase='playing';
+  addLog(room, `Rodada iniciada — peça inicial duplo-${doubleValue}.`);
+}
+
+function currentPlayerId(room){ return room.round.turnOrder[room.round.turnIndex]; }
+
+function trainAccessible(room, trainId, playerId){
+  const t = room.round.trains[trainId];
+  if(!t) return false;
+  if(t.ownerId===playerId) return true;
+  return !!t.public;
+}
+
+function legalTargetsForTile(room, playerId, tile){
+  const r = room.round;
+  const targets=[];
+  for(const tid of Object.keys(r.trains)){
+    if(r.pendingDouble){
+      if(tid!==r.pendingDouble.trainId) continue;
+      if(tile.a!==r.pendingDouble.value && tile.b!==r.pendingDouble.value) continue;
+      targets.push(tid); continue;
+    }
+    if(!trainAccessible(room, tid, playerId)) continue;
+    const end = r.trains[tid].endValue;
+    if(tile.a===end || tile.b===end) targets.push(tid);
+  }
+  return targets;
+}
+
+function hasAnyLegalMove(room, playerId){
+  const hand = room.round.hands[playerId] || [];
+  return hand.some(t => legalTargetsForTile(room, playerId, t).length>0);
+}
+
+function advanceTurn(room){
+  const r = room.round;
+  r.turnsTaken = (r.turnsTaken||0) + 1;
+  if(r.turnsTaken===1 && !r.trains['mexican'].public){
+    r.trains['mexican'].public = true;
+    addLog(room, '🚂 O Trem Mexicano foi liberado — agora qualquer um pode jogar nele.');
+  }
+  r.turnIndex = (r.turnIndex+1) % r.turnOrder.length;
+  r.hasDrawnThisTurn = false;
+}
+
+function concludeTurnMarker(room, playerId){
+  if(playerId==='mexican') return;
+  const r = room.round;
+  const hand = r.hands[playerId] || [];
+  const canStillExtendOwn = hand.some(t => legalTargetsForTile(room, playerId, t).includes(playerId));
+  if(!canStillExtendOwn) r.trains[playerId].public = true;
+}
+
+function applyPlaceTile(room, playerId, handIdx, trainId){
+  const r = room.round;
+  const hand = r.hands[playerId];
+  const tile = hand[handIdx];
+  if(!tile) return {ok:false, msg:'Peça inválida.'};
+  const legal = legalTargetsForTile(room, playerId, tile);
+  if(!legal.includes(trainId)) return {ok:false, msg:'Jogada não permitida ali.'};
+
+  const train = r.trains[trainId];
+  const end = (r.pendingDouble && r.pendingDouble.trainId===trainId) ? r.pendingDouble.value : train.endValue;
+  const newEnd = (tile.a===end) ? tile.b : tile.a;
+  // orient the tile so its FIRST value is the one that connects to the existing open end
+  const oriented = (tile.a===end) ? {a:tile.a,b:tile.b} : {a:tile.b,b:tile.a};
+
+  hand.splice(handIdx,1);
+  train.tiles.push(oriented);
+  train.endValue = newEnd;
+
+  if(trainId===playerId) train.public=false;
+  if(r.pendingDouble && r.pendingDouble.trainId===trainId) r.pendingDouble = null;
+
+  const laneLabel = trainId==='mexican' ? 'no Trem Mexicano' : (trainId===playerId ? 'no próprio trem' : `no trem de ${nameOf(room,trainId)}`);
+  addLog(room, `${nameOf(room,playerId)} jogou ${oriented.a}|${oriented.b} ${laneLabel}${isDouble(oriented)?' — é um duplo! 🁢':''}.`);
+  r.consecutivePasses = 0;
+
+  if(hand.length===0){
+    r.finished=true; r.winnerId=playerId; r.blocked=false;
+    finalizeRound(room);
+    return {ok:true, roundOver:true};
+  }
+
+  if(hand.length===1){
+    addLog(room, `⚠️ ${nameOf(room,playerId)} ficou com apenas 1 peça na mão!`);
+  }
+
+  if(isDouble(oriented)){
+    // this double must be satisfied next — by this same player first, then by
+    // whoever's turn comes after, until someone covers it. Turn does not advance yet.
+    r.pendingDouble = {value:oriented.a, trainId};
+  } else {
+    if(trainId!==playerId) concludeTurnMarker(room, playerId);
+    advanceTurn(room);
+  }
+  return {ok:true};
+}
+
+function applyDraw(room, playerId){
+  const r = room.round;
+  if(r.hasDrawnThisTurn) return {ok:false, msg:'Você já comprou nesta jogada.'};
+  if(r.boneyard.length===0) return {ok:false, msg:'O monte já acabou.'};
+  const tile = r.boneyard.pop();
+  r.hands[playerId].push(tile);
+  r.hasDrawnThisTurn = true;
+  addLog(room, `${nameOf(room,playerId)} comprou uma peça.`);
+  if(!hasAnyLegalMove(room, playerId)) failAttempt(room, playerId);
+  return {ok:true};
+}
+
+function applyPass(room, playerId){
+  const r = room.round;
+  if(hasAnyLegalMove(room, playerId)) return {ok:false, msg:'Você ainda tem uma jogada possível.'};
+  if(r.boneyard.length>0 && !r.hasDrawnThisTurn) return {ok:false, msg:'Compre uma peça antes de passar.'};
+  addLog(room, `${nameOf(room,playerId)} passou a vez.`);
+  failAttempt(room, playerId);
+  return {ok:true};
+}
+
+function failAttempt(room, playerId){
+  const r = room.round;
+  concludeTurnMarker(room, playerId);
+  r.consecutivePasses += 1;
+  advanceTurn(room);
+  if(r.consecutivePasses >= room.players.length && r.boneyard.length===0){
+    r.finished=true; r.blocked=true; r.winnerId=null;
+    finalizeRound(room);
+  }
+}
+
+function finalizeRound(room){
+  const r = room.round;
+  room.players.forEach(p=>{
+    const handVal = (r.hands[p.id]||[]).reduce((s,t)=>s+tileSum(t),0);
+    const score = (p.id===r.winnerId) ? 0 : handVal;
+    if(!room.scores[p.id]) room.scores[p.id]=[];
+    room.scores[p.id].push(score);
+  });
+  room.phase='round_over';
+  addLog(room, r.blocked ? 'Rodada travada — ninguém conseguiu jogar.' : `${nameOf(room,r.winnerId)} bateu! Fim da rodada.`);
+}
+
+function startNextRound(room){
+  room.roundNumber += 1;
+  if(room.roundNumber > MAX_VAL){ room.phase='game_over'; addLog(room, 'Fim de jogo!'); }
+  else startRound(room, MAX_VAL - room.roundNumber);
+}
+
+function cumulativeTotals(room){
+  const totals={};
+  room.players.forEach(p=>{ totals[p.id] = (room.scores[p.id]||[]).reduce((s,v)=>s+v,0); });
+  return totals;
+}
+
+function computePlayedCounts(room){
+  const counts = new Array(MAX_VAL+1).fill(0);
+  const allPlaced = [room.round.hub, ...Object.values(room.round.trains).flatMap(t=>t.tiles)];
+  allPlaced.forEach(t=>{ new Set([t.a,t.b]).forEach(v=>counts[v]++); });
+  return counts;
+}
+
+/* ============================== BOT (computer player) LOGIC ============================== */
+function botChooseMove(room, botId, difficulty){
+  const r = room.round;
+  const hand = r.hands[botId];
+  const options = [];
+  hand.forEach((tile, idx)=>{
+    legalTargetsForTile(room, botId, tile).forEach(trainId=>options.push({idx, tile, trainId}));
+  });
+  if(options.length===0){
+    if(r.boneyard.length>0 && !r.hasDrawnThisTurn) return {type:'draw'};
+    return {type:'pass'};
+  }
+  if(difficulty==='easy'){
+    const pick = options[Math.floor(Math.random()*options.length)];
+    return {type:'place', idx:pick.idx, trainId:pick.trainId};
+  }
+  function scoreOption(opt){
+    let score = tileSum(opt.tile);
+    if(isDouble(opt.tile)) score += 15;
+    if(difficulty==='hard'){
+      if(opt.trainId===botId) score += 8;
+      else if(opt.trainId==='mexican') score -= 4;
+      else score -= 10;
+    }
+    return score;
+  }
+  options.sort((a,b)=>scoreOption(b)-scoreOption(a));
+  return {type:'place', idx:options[0].idx, trainId:options[0].trainId};
+}
+function isBotTurn(room){
+  if(!room.round) return false;
+  const p = room.players.find(pl=>pl.id===currentPlayerId(room));
+  return !!(p && p.isBot);
+}
+function driveBotsIfNeeded(){
+  if(!appState.isLocal) return;
+  const room = appState.room;
+  if(!room || room.phase!=='playing' || !isBotTurn(room)) return;
+  appState.busy = true;
+  setTimeout(()=>{
+    const cur = currentPlayerId(room);
+    const move = botChooseMove(room, cur, appState.botDifficulty);
+    if(move.type==='place') applyPlaceTile(room, cur, move.idx, move.trainId);
+    else if(move.type==='draw') applyDraw(room, cur);
+    else applyPass(room, cur);
+    appState.room = room;
+    appState.busy = false;
+    render();
+    driveBotsIfNeeded();
+  }, 650);
+}
+
+/* ============================== RENDER ============================== */
+const appEl = document.getElementById('app');
+
+function render(){
+  if(appState.mode==='landing') return renderLanding();
+  if(appState.mode==='lobby') return renderLobby();
+  if(appState.mode==='game') return renderGame();
+}
+
+function renderLanding(){
+  appEl.innerHTML = `
+    <div class="landing">
+      <h1>Trem Mexicano</h1>
+      <div class="rail-rule"></div>
+      <p class="sub">Dominó em rodadas, trens públicos e aquele duplo travado que ninguém queria puxar. Crie uma sala e chame a turma.</p>
+      <div class="landing-cards">
+        <div class="depot-card">
+          <h3>Criar sala</h3>
+          <p>Você vira o anfitrião e recebe um código para compartilhar.</p>
+          <input type="text" id="create-name" placeholder="Seu nome" maxlength="18" />
+          <button class="btn-primary" data-action="create-room">Criar sala</button>
+          <div class="field-error" id="create-error"></div>
+        </div>
+        <div class="depot-card">
+          <h3>Entrar em sala</h3>
+          <p>Peça o código de 4 letras para quem criou a sala.</p>
+          <input type="text" id="join-name" placeholder="Seu nome" maxlength="18" />
+          <input type="text" id="join-code" placeholder="Código da sala" maxlength="4" style="text-transform:uppercase" />
+          <button class="btn-primary" data-action="join-room">Entrar</button>
+          <div class="field-error" id="join-error"></div>
+        </div>
+        <div class="depot-card">
+          <h3>Jogar sozinho</h3>
+          <p>Pratique contra o computador — sem precisar de outro jogador.</p>
+          <input type="text" id="local-name" placeholder="Seu nome" maxlength="18" />
+          <div class="mini-label">Total de jogadores (você + CPUs)</div>
+          <div class="chip-row">
+            ${[2,3,4,5,6,7,8].map(n=>`<button class="chip-btn ${appState.localSetup.players===n?'active':''}" data-action="set-local-players" data-n="${n}">${n}</button>`).join('')}
+          </div>
+          <div class="mini-label">Dificuldade</div>
+          <div class="chip-row">
+            ${[['easy','Fácil'],['medium','Médio'],['hard','Difícil']].map(([k,l])=>`<button class="chip-btn ${appState.localSetup.difficulty===k?'active':''}" data-action="set-local-difficulty" data-d="${k}">${l}</button>`).join('')}
+          </div>
+          <button class="btn-primary" data-action="start-local">Jogar sozinho</button>
+          <div class="field-error" id="local-error"></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderLobby(){
+  const room = appState.room;
+  const isHost = appState.identity.id===room.hostId;
+  const me = room.players.find(p=>p.id===appState.identity.id);
+  const myColor = me ? me.color : null;
+  const takenByOthers = room.players.filter(p=>p.id!==appState.identity.id && p.color).map(p=>p.color);
+
+  const swatchesHtml = PALETTE.map(c=>{
+    const taken = takenByOthers.includes(c);
+    const mine = myColor===c;
+    return `<div class="swatch ${mine?'mine':''} ${taken?'taken':''}" style="background:${c}" data-action="${taken?'':'pick-color'}" data-color="${c}"></div>`;
+  }).join('');
+
+  appEl.innerHTML = `
+    <div class="lobby">
+      <div class="code-plate">
+        <div class="label">CÓDIGO DA SALA</div>
+        <div class="code">${room.code}</div>
+      </div>
+      <div class="manifest">
+        <h3>Jogadores (${room.players.length}/8)</h3>
+        <ul>
+          ${room.players.map(p=>`
+            <li>
+              <span class="color-dot" style="background:${p.color||'transparent'};border-style:${p.color?'solid':'dashed'}"></span>
+              <span class="pname">${escapeHtml(p.name)}</span>
+              ${p.id===room.hostId?'<span class="badge-host">anfitrião</span>':''}
+            </li>
+          `).join('')}
+        </ul>
+      </div>
+      <div class="swatch-box">
+        <h3>Sua cor</h3>
+        <div class="swatch-row">${swatchesHtml}</div>
+      </div>
+      ${isHost ? `
+        <button class="btn-primary" data-action="start-game" ${room.players.length<2?'disabled':''}>
+          ${room.players.length<2 ? 'Aguardando mais jogadores…' : 'Iniciar jogo'}
+        </button>
+        <div class="lobby-hint">Duplo-12 · até 8 jogadores · mãos de ${HAND_SIZE[room.players.length]||'-'} peças. Quem não escolher cor recebe uma automaticamente ao iniciar.</div>
+      ` : `
+        <div class="lobby-hint">Aguardando o anfitrião iniciar a partida…</div>
+      `}
+      <button class="btn-ghost btn-small" data-action="show-rules">Ver regras</button>
+    </div>
+    ${appState.rulesOpen ? renderRulesModal() : ''}
+  `;
+}
+
+/* ---- HTML tile renderer (used only for the hand tray) ---- */
+function tileHtml(t, cls, opts={}){
+  const half = (v)=>{
+    const color = PIP_COLORS[v] || 'var(--ink)';
+    if(v<=6){
+      const layouts = {0:[],1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,1,2,6,7,8]};
+      const cells = layouts[v]||[];
+      let grid='';
+      for(let i=0;i<9;i++) grid += `<div class="pip" style="visibility:${cells.includes(i)?'visible':'hidden'};background:${color}"></div>`;
+      return `<div class="half"><div class="pip-grid">${grid}</div></div>`;
+    }
+    return `<div class="half"><span class="numeral" style="color:${color}">${v}</span></div>`;
+  };
+  return `<div class="tile ${cls} ${isDouble(t)?'is-double':''}" ${opts.attrs||''}>${half(t.a)}${half(t.b)}</div>`;
+}
+
+/* ---- SVG tile/branch renderers (used for the radial board) ---- */
+function svgPips(value, cx, cy, w, h){
+  const color = PIP_COLORS[value] || 'var(--ink)';
+  if(value>6) return `<text x="${cx}" y="${cy+9}" text-anchor="middle" font-size="30" font-weight="800" fill="${color}">${value}</text>`;
+  const layouts = {0:[],1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,1,2,6,7,8]};
+  const cells = layouts[value]||[];
+  const gx=w/3, gy=h/3; let out='';
+  cells.forEach(idx=>{
+    const col=idx%3, row=Math.floor(idx/3);
+    const px = cx - w/2 + gx*(col+0.5);
+    const py = cy - h/2 + gy*(row+0.5);
+    out += `<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="5.6" fill="${color}"/>`;
+  });
+  return out;
+}
+function svgTile(tile, xStart){
+  const cx1 = xStart + TILE_LEN/4, cx2 = xStart + 3*TILE_LEN/4;
+  const rot = isDouble(tile) ? ` rotate(90 ${(xStart+TILE_LEN/2).toFixed(1)} 0)` : '';
+  return `
+    <g transform="${rot}">
+      <rect x="${xStart}" y="${-TILE_THICK/2}" width="${TILE_LEN}" height="${TILE_THICK}" rx="6" fill="var(--ivory)" stroke="var(--ink)" stroke-width="2"/>
+      <line x1="${xStart+TILE_LEN/2}" y1="${-TILE_THICK/2}" x2="${xStart+TILE_LEN/2}" y2="${TILE_THICK/2}" stroke="var(--ink)" stroke-width="2.4"/>
+      ${svgPips(tile.a, cx1, 0, TILE_LEN/2-7, TILE_THICK-9)}
+      ${svgPips(tile.b, cx2, 0, TILE_LEN/2-7, TILE_THICK-9)}
+    </g>`;
+}
+function svgBranch(room, tid, index, N, me, selectedTargets){
+  const angle = 90 + index*(360/N);
+  const train = room.round.trains[tid];
+  const isMe = tid===me.id;
+  const label = tid==='mexican' ? 'Trem Mexicano' : (isMe ? 'Meu trem' : nameOf(room,tid));
+  const color = colorOf(room, tid) || 'var(--rail)';
+  const isTarget = selectedTargets.includes(tid);
+  const tilesSvg = train.tiles.map((t,k)=>svgTile(t, TILE_START + k*(TILE_LEN+TILE_GAP))).join('');
+  const hitLen = TILE_START + Math.max(train.tiles.length,10)*(TILE_LEN+TILE_GAP) + 100;
+  const markerSvg = tid==='mexican'
+    ? (train.public
+        ? `<circle cx="${MARKER_R}" cy="0" r="36" fill="var(--rail)"/><text x="${MARKER_R}" y="13" text-anchor="middle" font-size="36">🌵</text>`
+        : `<circle cx="${MARKER_R}" cy="0" r="36" fill="var(--wood-dark)" stroke="var(--rail)" stroke-width="6"/><text x="${MARKER_R}" y="13" text-anchor="middle" font-size="34">🔒</text>`)
+    : (train.public
+        ? `<circle cx="${MARKER_R}" cy="0" r="32" fill="${color}" stroke="var(--wood-dark)" stroke-width="3"/>`
+        : `<circle cx="${MARKER_R}" cy="0" r="32" fill="var(--wood-dark)" stroke="${color}" stroke-width="7"/><text x="${MARKER_R}" y="13" text-anchor="middle" font-size="34">🔒</text>`
+      );
+  return `
+    <g transform="translate(${CENTER},${CENTER}) rotate(${angle})" data-action="place-on" data-train="${tid}">
+      <rect class="branch-hit ${isTarget?'is-target':''}" x="${TILE_START-58}" y="-70" width="${hitLen}" height="140"/>
+      <g transform="translate(${MARKER_R},-70) rotate(${-angle})">
+        <text text-anchor="middle" font-size="30" font-weight="700" fill="${isMe?'var(--rail-bright)':'var(--cream)'}">${escapeHtml(label)}</text>
+      </g>
+      ${markerSvg}
+      ${tilesSvg}
+    </g>`;
+}
+function renderRadialBoardSVG(room, me, selectedTargets){
+  const ids = [me.id, ...room.players.map(p=>p.id).filter(id=>id!==me.id), 'mexican'];
+  const N = ids.length;
+  const hub = room.round.hub;
+  const hubSvg = `
+    <circle cx="${CENTER}" cy="${CENTER}" r="${HUB_R}" fill="var(--ivory)" stroke="var(--rail)" stroke-width="9"/>
+    <text x="${CENTER}" y="${CENTER+22}" text-anchor="middle" font-size="66" font-weight="800" fill="${PIP_COLORS[hub.a]||'var(--ink)'}">${hub.a}</text>`;
+  const branches = ids.map((tid,i)=>svgBranch(room, tid, i, N, me, selectedTargets)).join('');
+  return `
+    <div class="board-zoom-wrap">
+      <div class="board-zoom-inner" style="transform:translate(${appState.panX}px,${appState.panY}px) scale(${appState.zoom})">
+        <svg viewBox="0 0 ${VIEWBOX} ${VIEWBOX}" width="${VIEWBOX}" height="${VIEWBOX}">${hubSvg}${branches}</svg>
+      </div>
+    </div>
+    <div class="zoom-controls">
+      <button class="btn-ghost btn-small" data-action="zoom-out">−</button>
+      <span class="zoom-level">${Math.round(appState.zoom*100)}%</span>
+      <button class="btn-ghost btn-small" data-action="zoom-in">+</button>
+      <button class="btn-ghost btn-small" data-action="zoom-reset">Centralizar</button>
+    </div>`;
+}
+
+/* ---- Pan/zoom control (persists across re-renders; supports drag + pinch) ---- */
+function applyBoardTransform(){
+  const inner = document.querySelector('.board-zoom-inner');
+  const label = document.querySelector('.zoom-level');
+  if(inner) inner.style.transform = `translate(${appState.panX}px,${appState.panY}px) scale(${appState.zoom})`;
+  if(label) label.textContent = Math.round(appState.zoom*100)+'%';
+}
+function centerBoard(resetZoom){
+  const wrap = document.querySelector('.board-zoom-wrap');
+  if(!wrap) return;
+  if(resetZoom) appState.zoom = 0.55;
+  const w = wrap.clientWidth || 320, h = wrap.clientHeight || 320;
+  appState.panX = w/2 - CENTER*appState.zoom;
+  appState.panY = h/2 - CENTER*appState.zoom;
+  appState.boardMounted = true;
+  applyBoardTransform();
+}
+function adjustZoom(factor){
+  const wrap = document.querySelector('.board-zoom-wrap');
+  if(!wrap) return;
+  const rect = wrap.getBoundingClientRect();
+  const cx = rect.width/2, cy = rect.height/2;
+  const contentX = (cx - appState.panX)/appState.zoom;
+  const contentY = (cy - appState.panY)/appState.zoom;
+  appState.zoom = Math.max(0.15, Math.min(2.0, appState.zoom*factor));
+  appState.panX = cx - contentX*appState.zoom;
+  appState.panY = cy - contentY*appState.zoom;
+  applyBoardTransform();
+}
+function setupBoardPanZoom(){
+  const wrap = document.querySelector('.board-zoom-wrap');
+  if(!wrap) return;
+  if(!appState.boardMounted) centerBoard(false);
+  else applyBoardTransform();
+
+  const pointers = new Map();
+  let panLast = null;
+  let pinchStartDist = 0, pinchStartZoom = 1, pinchMidX = 0, pinchMidY = 0, pinchContentX = 0, pinchContentY = 0;
+
+  const dist = (a,b)=>Math.hypot(a.x-b.x, a.y-b.y);
+  const mid = (a,b)=>({x:(a.x+b.x)/2, y:(a.y+b.y)/2});
+
+  wrap.addEventListener('pointerdown', (e)=>{
+    wrap.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    if(pointers.size===1){
+      panLast = {x:e.clientX, y:e.clientY};
+    } else if(pointers.size===2){
+      const pts = [...pointers.values()];
+      pinchStartDist = dist(pts[0], pts[1]) || 1;
+      pinchStartZoom = appState.zoom;
+      const rect = wrap.getBoundingClientRect();
+      const m = mid(pts[0], pts[1]);
+      pinchMidX = m.x - rect.left; pinchMidY = m.y - rect.top;
+      pinchContentX = (pinchMidX - appState.panX)/appState.zoom;
+      pinchContentY = (pinchMidY - appState.panY)/appState.zoom;
+    }
+  });
+  wrap.addEventListener('pointermove', (e)=>{
+    if(!pointers.has(e.pointerId)) return;
+    pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    if(pointers.size===1 && panLast){
+      const dx = e.clientX - panLast.x, dy = e.clientY - panLast.y;
+      appState.panX += dx; appState.panY += dy;
+      panLast = {x:e.clientX, y:e.clientY};
+      applyBoardTransform();
+    } else if(pointers.size===2){
+      const pts = [...pointers.values()];
+      const newDist = dist(pts[0], pts[1]);
+      const ratio = newDist / pinchStartDist;
+      appState.zoom = Math.max(0.15, Math.min(2.0, pinchStartZoom*ratio));
+      appState.panX = pinchMidX - pinchContentX*appState.zoom;
+      appState.panY = pinchMidY - pinchContentY*appState.zoom;
+      applyBoardTransform();
+    }
+  });
+  const endPointer = (e)=>{
+    pointers.delete(e.pointerId);
+    if(pointers.size===1) panLast = [...pointers.values()][0];
+    else panLast = null;
+  };
+  wrap.addEventListener('pointerup', endPointer);
+  wrap.addEventListener('pointercancel', endPointer);
+}
+
+/* ---- Hand drag-to-reorder (long-press then drag; short swipes still scroll) ---- */
+function setupHandDrag(){
+  const row = document.querySelector('.hand-row');
+  if(!row) return;
+  row.querySelectorAll('.hand-tile').forEach(el=>{
+    let pressTimer=null, dragging=false, startX=0, startY=0, pid=null;
+    el.addEventListener('pointerdown', (e)=>{
+      startX=e.clientX; startY=e.clientY; pid=e.pointerId;
+      clearTimeout(pressTimer);
+      pressTimer = setTimeout(()=>{
+        dragging = true;
+        try{ el.setPointerCapture(pid); }catch(err){}
+        el.classList.add('dragging');
+        row.style.touchAction='none';
+      }, 160);
+    });
+    el.addEventListener('pointermove', (e)=>{
+      if(!dragging){
+        if(Math.abs(e.clientX-startX)>8 || Math.abs(e.clientY-startY)>8) clearTimeout(pressTimer);
+        return;
+      }
+      const dx = e.clientX - startX;
+      el.style.transform = `translateX(${dx}px) translateY(-8px)`;
+      const tiles = [...row.querySelectorAll('.hand-tile')];
+      let newTarget = 0;
+      tiles.forEach(t=>{
+        if(t===el) return;
+        const r = t.getBoundingClientRect();
+        if(r.left + r.width/2 < e.clientX) newTarget++;
+      });
+      el.dataset.targetIdx = newTarget;
+    });
+    const endHandler = ()=>{
+      clearTimeout(pressTimer);
+      row.style.touchAction='pan-x';
+      if(dragging){
+        dragging = false;
+        el.classList.remove('dragging');
+        el.style.transform='';
+        const from = Number(el.dataset.idx);
+        const to = Number(el.dataset.targetIdx!=null ? el.dataset.targetIdx : from);
+        if(to!==from) commitHandReorder(from, to);
+      }
+    };
+    el.addEventListener('pointerup', endHandler);
+    el.addEventListener('pointercancel', endHandler);
+  });
+}
+
+function renderGame(){
+  const room = appState.room;
+  const me = appState.identity;
+  const r = room.round;
+
+  if(room.phase==='round_over') return renderRoundOverModalWrap(room);
+  if(room.phase==='game_over') return renderGameOverWrap(room);
+
+  const curId = currentPlayerId(room);
+  const myTurn = curId===me.id;
+  const hand = r.hands[me.id] || [];
+  const handPoints = hand.reduce((s,t)=>s+tileSum(t),0);
+
+  let selectedTargets = [];
+  if(myTurn && appState.selectedHandIdx!=null && hand[appState.selectedHandIdx]){
+    selectedTargets = legalTargetsForTile(room, me.id, hand[appState.selectedHandIdx]);
+  }
+
+  const anyLegal = myTurn ? hasAnyLegalMove(room, me.id) : false;
+  const accessibleIds = r.pendingDouble
+    ? [r.pendingDouble.trainId]
+    : Object.keys(r.trains).filter(tid=>trainAccessible(room, tid, me.id));
+  const endsPanelHtml = myTurn ? `
+    <div class="ends-panel">
+      <div class="ends-title">${r.pendingDouble ? `Duplo ${r.pendingDouble.value} precisa ser coberto:` : 'Você pode jogar em:'}</div>
+      <div class="ends-row">
+        ${accessibleIds.map(tid=>{
+          const label = tid==='mexican' ? 'Trem Mexicano' : (tid===me.id ? 'Meu trem' : nameOf(room,tid));
+          const val = r.trains[tid].endValue;
+          const isSel = selectedTargets.includes(tid);
+          return `<div class="end-card ${isSel?'is-target':''}" data-action="place-on" data-train="${tid}">
+            <div class="end-label">${escapeHtml(label)}</div>
+            <div class="end-value" style="color:${PIP_COLORS[val]||'var(--ink)'}">${val}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>` : '';
+  let turnActionHtml='';
+  if(myTurn){
+    if(r.pendingDouble){
+      turnActionHtml += `<div class="action-hint">É a sua vez de tentar cobrir o duplo.</div>`;
+    } else {
+      turnActionHtml += `<div class="action-hint">Sua vez — escolha uma peça.</div>`;
+    }
+    if(!anyLegal){
+      if(r.boneyard.length>0 && !r.hasDrawnThisTurn){
+        turnActionHtml += `<button class="btn-primary btn-small" data-action="draw-tile">Comprar peça</button>`;
+      } else {
+        turnActionHtml += `<button class="btn-danger btn-small" data-action="pass-turn">Passar vez</button>`;
+      }
+    }
+  } else {
+    turnActionHtml += `<div class="action-hint">Vez de ${escapeHtml(nameOf(room,curId))}…</div>`;
+  }
+
+  const reorderHtml = appState.selectedHandIdx!=null ? `
+    <div class="reorder-row">
+      <button class="btn-ghost btn-small" data-action="move-tile" data-dir="-1">◀ mover</button>
+      <button class="btn-ghost btn-small" data-action="move-tile" data-dir="1">mover ▶</button>
+    </div>` : '';
+
+  const handHtml = hand.map((t,idx)=>{
+    const sel = appState.selectedHandIdx===idx;
+    return tileHtml(t, `hand-tile ${sel?'selected':''}`, {attrs:`data-action="select-tile" data-idx="${idx}"`});
+  }).join('');
+
+  const playerStripHtml = `
+    <div class="player-strip">
+      ${room.players.map(p=>{
+        const cnt = (r.hands[p.id]||[]).length;
+        const low = cnt===1;
+        return `<span class="player-chip ${low?'low-tiles':''}">${low?'⚠️ ':''}<span class="color-dot" style="background:${p.color||'#888'}"></span>${escapeHtml(p.name)}: <b>${cnt}</b></span>`;
+      }).join('')}
+    </div>`;
+
+  const doubleAlertHtml = r.pendingDouble ? `
+    <div class="double-alert">⚠️ Duplo ${r.pendingDouble.value} está aberto ${r.pendingDouble.trainId==='mexican' ? 'no Trem Mexicano' : 'no trem de '+escapeHtml(nameOf(room,r.pendingDouble.trainId))} — precisa ser coberto antes de qualquer outra jogada.</div>
+  ` : '';
+
+  const playedCounts = computePlayedCounts(room);
+  const countsHtml = `
+    <div class="count-panel">
+      <button class="btn-ghost btn-small count-toggle" data-action="toggle-counts">${appState.showCounts?'Ocultar':'Ver'} contagem de peças jogadas</button>
+      ${appState.showCounts ? `
+        <div class="count-grid">
+          ${playedCounts.map((c,v)=>`<div class="count-chip">${v}<b>${c}/13</b></div>`).join('')}
+        </div>` : ''}
+    </div>`;
+
+  appEl.innerHTML = `
+    <div class="game">
+      <div class="topbar">
+        <div class="chip">Sala <b>${room.code}</b></div>
+        <div class="chip">Rodada <b>${room.roundNumber+1}/13</b> · duplo <b>${r.doubleValue}</b></div>
+        <div class="chip">Monte <b>${r.boneyard.length}</b></div>
+        <div class="turn-flag ${myTurn?'me':''}">${myTurn?'Sua vez':escapeHtml(nameOf(room,curId))+' jogando'}</div>
+        <button class="btn-ghost btn-small" data-action="show-rules">Regras</button>
+      </div>
+      ${playerStripHtml}
+      ${doubleAlertHtml}
+      ${endsPanelHtml}
+      <div class="board-scroll">
+        ${countsHtml}
+        ${renderRadialBoardSVG(room, me, selectedTargets)}
+        <div class="log-panel">${room.log.slice(-8).map(l=>`<div>${escapeHtml(l)}</div>`).join('')}</div>
+      </div>
+      <div class="hand-wrap">
+        <div class="hand-label">Sua mão — ${hand.length} peças · ${handPoints} pontos</div>
+        <div class="hand-row">${handHtml}</div>
+        ${reorderHtml}
+        <div class="action-row">${turnActionHtml}</div>
+      </div>
+    </div>
+    ${appState.rulesOpen ? renderRulesModal() : ''}
+  `;
+  setupBoardPanZoom();
+  setupHandDrag();
+}
+
+function renderRoundOverModalWrap(room){
+  const isHost = appState.identity.id===room.hostId;
+  const totals = cumulativeTotals(room);
+  const sorted = [...room.players].sort((a,b)=>totals[a.id]-totals[b.id]);
+  const minTotal = Math.min(...room.players.map(p=>totals[p.id]));
+  appEl.innerHTML = `
+    <div class="game">
+      <div class="topbar"><div class="chip">Sala <b>${room.code}</b></div></div>
+      <div class="board-scroll"><div class="log-panel">${room.log.slice(-8).map(l=>`<div>${escapeHtml(l)}</div>`).join('')}</div></div>
+    </div>
+    <div class="modal-backdrop">
+      <div class="modal">
+        <h2>Fim da rodada</h2>
+        <div class="sub">Duplo ${room.round.doubleValue} · rodada ${room.roundNumber+1} de 13</div>
+        <table class="score-table">
+          <thead><tr><th>Jogador</th><th>Rodada</th><th>Total</th></tr></thead>
+          <tbody>
+            ${sorted.map(p=>{
+              const roundScores = room.scores[p.id]||[];
+              const last = roundScores[roundScores.length-1];
+              return `<tr class="${totals[p.id]===minTotal?'leader':''}"><td class="pname"><span class="color-dot" style="background:${p.color||'#888'}"></span>${escapeHtml(p.name)}</td><td>${last}</td><td>${totals[p.id]}</td></tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+        <div class="modal-actions">
+          ${isHost ? `<button class="btn-primary" data-action="next-round">Próxima rodada</button>` : `<span class="action-hint">Aguardando o anfitrião…</span>`}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderGameOverWrap(room){
+  const isHost = appState.identity.id===room.hostId;
+  const totals = cumulativeTotals(room);
+  const sorted = [...room.players].sort((a,b)=>totals[a.id]-totals[b.id]);
+  appEl.innerHTML = `
+    <div class="game">
+      <div class="topbar"><div class="chip">Sala <b>${room.code}</b></div></div>
+      <div class="board-scroll"></div>
+    </div>
+    <div class="modal-backdrop">
+      <div class="modal">
+        <h2>Fim de jogo 🏆</h2>
+        <div class="sub">Classificação final — menor pontuação vence</div>
+        <table class="score-table">
+          <thead><tr><th>#</th><th>Jogador</th><th>Total</th></tr></thead>
+          <tbody>
+            ${sorted.map((p,i)=>`<tr class="${i===0?'leader':''}"><td>${i+1}</td><td class="pname"><span class="color-dot" style="background:${p.color||'#888'}"></span>${escapeHtml(p.name)}</td><td>${totals[p.id]}</td></tr>`).join('')}
+          </tbody>
+        </table>
+        <div class="modal-actions">
+          ${isHost ? `<button class="btn-primary" data-action="new-game">Nova partida</button>` : `<span class="action-hint">Aguardando o anfitrião…</span>`}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderRulesModal(){
+  return `
+  <div class="modal-backdrop" data-action="close-rules">
+    <div class="modal" onclick="event.stopPropagation()">
+      <h2>Regras rápidas</h2>
+      <div class="rules-body">
+        <h4>Objetivo</h4>
+        <p>13 rodadas, uma para cada duplo de 12 a 0. Em cada rodada, some os pontos das peças que sobrarem na mão. Quem "bate" (fica sem peças) marca 0. No fim, vence quem tiver a menor soma total.</p>
+        <h4>Na sua vez</h4>
+        <p>Jogue uma peça no seu trem, ou no Trem Mexicano/trem de outro jogador se já estiverem destravados (bolinha colorida). O Trem Mexicano fica fechado só durante a primeiríssima jogada da rodada (a vez do primeiro jogador, dê ela certo ou não) — a partir da segunda vez, ele já está liberado para qualquer um, o resto da rodada inteira. Se não puder jogar, compre uma peça; se mesmo assim não der, passe a vez — seu trem só destrava se, ao final da sua vez, você não tiver nenhuma peça que encaixasse nele (jogar em outro lugar por escolha não abre o seu).</p>
+        <h4>Duplos</h4>
+        <p>Ao jogar um duplo, ele precisa ser coberto ali antes de qualquer outra jogada — por você mesmo primeiro (jogando ou comprando) e, se não der, pelo próximo jogador, e assim por diante até alguém encaixar uma peça naquele valor.</p>
+        <h4>No tabuleiro</h4>
+        <p>Cada trem é um raio saindo do centro. 🔒 = trem fechado (só o dono joga ali); bolinha colorida = trem público. Use os botões de zoom para ver as peças de perto.</p>
+      </div>
+      <div class="modal-actions"><button class="btn-ghost" data-action="close-rules">Fechar</button></div>
+    </div>
+  </div>`;
+}
+
+/* ============================== EVENT HANDLING ============================== */
+appEl.addEventListener('click', async (e)=>{
+  const el = e.target.closest('[data-action]');
+  if(!el) return;
+  const action = el.dataset.action;
+  if(!action) return;
+
+  if(action==='create-room') return onCreateRoom();
+  if(action==='join-room') return onJoinRoom();
+  if(action==='start-game') return onStartGame();
+  if(action==='pick-color') return onPickColor(el.dataset.color);
+  if(action==='show-rules'){ appState.rulesOpen=true; render(); return; }
+  if(action==='close-rules'){ appState.rulesOpen=false; render(); return; }
+  if(action==='select-tile'){ appState.selectedHandIdx = Number(el.dataset.idx); render(); return; }
+  if(action==='move-tile') return onMoveTile(Number(el.dataset.dir));
+  if(action==='place-on') return onPlaceOn(el.dataset.train);
+  if(action==='draw-tile') return onDraw();
+  if(action==='pass-turn') return onPass();
+  if(action==='next-round') return onNextRound();
+  if(action==='new-game') return onNewGame();
+  if(action==='toggle-counts'){ appState.showCounts = !appState.showCounts; render(); return; }
+  if(action==='zoom-in'){ adjustZoom(1.2); return; }
+  if(action==='zoom-out'){ adjustZoom(1/1.2); return; }
+  if(action==='zoom-reset'){ centerBoard(true); return; }
+  if(action==='set-local-players'){ appState.localSetup.players = Number(el.dataset.n); render(); return; }
+  if(action==='set-local-difficulty'){ appState.localSetup.difficulty = el.dataset.d; render(); return; }
+  if(action==='start-local') return onStartLocalGame();
+});
+
+async function onCreateRoom(){
+  const nameInput = document.getElementById('create-name');
+  const errEl = document.getElementById('create-error');
+  const name = (nameInput.value||'').trim();
+  if(!name){ errEl.textContent='Digite seu nome.'; return; }
+  const code = randomCode();
+  const me = {id:randomId(), name, color:null};
+  const room = createRoomState(code, me);
+  const ok = await saveRoom(room);
+  if(!ok){ errEl.textContent='Não deu para criar a sala agora. Tente de novo.'; return; }
+  await saveIdentity(code, me);
+  appState.isLocal = false;
+  appState.identity = me; appState.code = code; appState.room = room; appState.mode = 'lobby';
+  render(); startPolling();
+}
+
+async function onJoinRoom(){
+  const nameInput = document.getElementById('join-name');
+  const codeInput = document.getElementById('join-code');
+  const errEl = document.getElementById('join-error');
+  const name = (nameInput.value||'').trim();
+  const code = (codeInput.value||'').trim().toUpperCase();
+  if(!code){ errEl.textContent='Digite o código da sala.'; return; }
+  const room = await loadRoom(code);
+  if(!room){ errEl.textContent='Sala não encontrada.'; return; }
+
+  const saved = await loadIdentity(code);
+  let me;
+  if(saved && room.players.some(p=>p.id===saved.id)){
+    me = saved;
+  } else {
+    if(!name){ errEl.textContent='Digite seu nome.'; return; }
+    if(room.phase!=='lobby'){ errEl.textContent='Essa sala já começou a partida.'; return; }
+    if(room.players.length>=8){ errEl.textContent='Sala cheia (8 jogadores).'; return; }
+    me = {id:randomId(), name, color:null};
+    room.players.push(me);
+    await saveIdentity(code, me);
+    const ok = await saveRoom(room);
+    if(!ok){ errEl.textContent='Não foi possível entrar agora. Tente de novo.'; return; }
+  }
+  appState.isLocal = false;
+  appState.identity = me; appState.code = code; appState.room = room;
+  appState.mode = room.phase==='lobby' ? 'lobby' : 'game';
+  render(); startPolling();
+}
+
+async function onPickColor(color){
+  if(appState.busy) return;
+  appState.busy=true;
+  const room = await loadRoom(appState.code);
+  const me = room.players.find(p=>p.id===appState.identity.id);
+  if(me){
+    const takenByOther = room.players.some(p=>p.id!==me.id && p.color===color);
+    if(!takenByOther){ me.color = color; await saveRoom(room); }
+  }
+  appState.room = room; appState.busy=false; render();
+}
+
+async function onStartGame(){
+  if(appState.busy) return;
+  appState.busy=true;
+  const room = await loadRoom(appState.code);
+  if(room && room.players.length>=2){
+    const used = new Set(room.players.map(p=>p.color).filter(Boolean));
+    const free = PALETTE.filter(c=>!used.has(c));
+    let fi=0;
+    room.players.forEach(p=>{ if(!p.color) p.color = free[fi++] || PALETTE[Math.floor(Math.random()*PALETTE.length)]; });
+    startRound(room, MAX_VAL);
+    await saveRoom(room);
+    appState.room = room; appState.mode='game'; appState.boardMounted=false; render();
+  }
+  appState.busy=false;
+}
+
+async function onMoveTile(dir){
+  if(appState.busy || appState.selectedHandIdx==null) return;
+  const i = appState.selectedHandIdx, j = i+dir;
+  await commitHandReorder(i, j);
+}
+
+async function commitHandReorder(fromIdx, toIdx){
+  if(appState.busy) return;
+  appState.busy=true;
+  const room = await getRoom();
+  const hand = room.round.hands[appState.identity.id];
+  if(hand && fromIdx>=0 && fromIdx<hand.length && toIdx>=0 && toIdx<hand.length && fromIdx!==toIdx){
+    const [item] = hand.splice(fromIdx,1);
+    hand.splice(toIdx,0,item);
+    appState.selectedHandIdx = toIdx;
+    await putRoom(room);
+  }
+  appState.room = room; appState.busy=false; render();
+}
+
+async function onPlaceOn(trainId){
+  if(appState.busy || appState.selectedHandIdx==null) return;
+  appState.busy=true;
+  const room = await getRoom();
+  const me = appState.identity;
+  if(currentPlayerId(room)===me.id){
+    applyPlaceTile(room, me.id, appState.selectedHandIdx, trainId);
+    await putRoom(room);
+  }
+  appState.selectedHandIdx=null; appState.room = room; appState.busy=false; render();
+  driveBotsIfNeeded();
+}
+
+async function onDraw(){
+  if(appState.busy) return;
+  appState.busy=true;
+  const room = await getRoom();
+  const me = appState.identity;
+  if(currentPlayerId(room)===me.id){ applyDraw(room, me.id); await putRoom(room); }
+  appState.room = room; appState.busy=false; render();
+  driveBotsIfNeeded();
+}
+
+async function onPass(){
+  if(appState.busy) return;
+  appState.busy=true;
+  const room = await getRoom();
+  const me = appState.identity;
+  if(currentPlayerId(room)===me.id){ applyPass(room, me.id); await putRoom(room); }
+  appState.room = room; appState.busy=false; render();
+  driveBotsIfNeeded();
+}
+
+async function onNextRound(){
+  if(appState.busy) return;
+  appState.busy=true;
+  const room = await getRoom();
+  if(room.hostId===appState.identity.id){ startNextRound(room); await putRoom(room); }
+  appState.room = room; appState.busy=false; render();
+  driveBotsIfNeeded();
+}
+
+async function onNewGame(){
+  if(appState.busy) return;
+  appState.busy=true;
+  const room = await getRoom();
+  if(room.hostId===appState.identity.id){
+    room.roundNumber=0; room.round=null; room.scores={};
+    if(appState.isLocal){
+      startRound(room, MAX_VAL);
+      addLog(room, 'Nova partida contra o computador.');
+    } else {
+      room.phase='lobby';
+      addLog(room, 'Nova partida iniciada pelo anfitrião.');
+    }
+    await putRoom(room);
+  }
+  appState.room = room;
+  appState.mode = appState.isLocal ? 'game' : 'lobby';
+  appState.boardMounted = false;
+  appState.busy=false; render();
+  driveBotsIfNeeded();
+}
+
+async function onStartLocalGame(){
+  const nameInput = document.getElementById('local-name');
+  const errEl = document.getElementById('local-error');
+  const name = (nameInput.value||'').trim();
+  if(!name){ errEl.textContent='Digite seu nome.'; return; }
+  const total = appState.localSetup.players;
+  const difficulty = appState.localSetup.difficulty;
+  const human = {id:randomId(), name, color:null, isBot:false};
+  const bots = [];
+  for(let i=1;i<total;i++) bots.push({id:'bot_'+i, name:'CPU '+i, color:null, isBot:true});
+  const players = [human, ...bots];
+  const used = new Set();
+  players.forEach(p=>{
+    const free = PALETTE.filter(c=>!used.has(c));
+    p.color = free[0] || PALETTE[Math.floor(Math.random()*PALETTE.length)];
+    used.add(p.color);
+  });
+  const room = {
+    code:'LOCAL', hostId:human.id, phase:'lobby',
+    players, roundNumber:0, round:null, scores:{},
+    log:[`${name} iniciou uma partida contra o computador (${total} jogadores, dificuldade ${difficulty}).`],
+  };
+  startRound(room, MAX_VAL);
+  appState.isLocal = true;
+  appState.botDifficulty = difficulty;
+  appState.identity = human;
+  appState.code = 'LOCAL';
+  appState.room = room;
+  appState.mode = 'game';
+  appState.boardMounted = false;
+  render();
+  driveBotsIfNeeded();
+}
+
+/* ============================== POLLING ============================== */
+function startPolling(){
+  if(appState.pollTimer) clearInterval(appState.pollTimer);
+  appState.pollTimer = setInterval(async ()=>{
+    if(appState.isLocal || !appState.code || appState.busy) return;
+    const room = await loadRoom(appState.code);
+    if(!room) return;
+    const changed = JSON.stringify(room)!==JSON.stringify(appState.room);
+    appState.room = room;
+    if(appState.mode==='lobby' && room.phase!=='lobby') appState.mode='game';
+    if(appState.mode==='game' && room.phase==='lobby') appState.mode='lobby';
+    if(changed) render();
+  }, POLL_MS);
+}
+
+/* ============================== BOOTSTRAP ============================== */
+render();
+</script>
+</body>
+</html>
